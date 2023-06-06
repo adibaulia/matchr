@@ -6,14 +6,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// unexported struct will be ignored.
-type test struct {
-	id  int
-	Xxx string
-	Ttt int
-}
-
-// generate code
 func main() {
 
 	cfg := gen.Config{

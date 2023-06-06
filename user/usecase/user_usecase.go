@@ -6,7 +6,7 @@ import (
 
 	"github.com/adibaulia/matchr/domain"
 	"github.com/adibaulia/matchr/domain/generated"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/adibaulia/matchr/pkg/token"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -38,7 +38,7 @@ func (u *UserUsecase) RegisterUser(user domain.User) error {
 	}
 	profileRepo := generated.Profile{
 		Name:            user.Profile.Name,
-		Gender:          domain.MALE,
+		Gender:          user.Profile.Gender,
 		DateOfBirth:     birthday,
 		Bio:             user.Profile.Bio,
 		ProfileImageURL: user.Profile.ProfileImageURL,
@@ -57,60 +57,21 @@ func (u *UserUsecase) LoginUser(username, password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if user.Username == "" {
+		return "", fmt.Errorf("invalid username")
+	}
 
 	ok := CheckPasswordHash(password, user.Password)
 	if !ok {
 		return "", fmt.Errorf("invalid password")
 	}
-	token, err := createToken(user.ID)
+	token, err := token.CreateToken(user.ID)
 	if err != nil {
 		return "", err
 	}
 
 	return token, nil
 
-}
-
-func createToken(userID string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userID": userID,
-		"exp":    time.Now().Add(24 * time.Hour).Unix(),
-	})
-
-	tokenString, err := token.SignedString([]byte("secretKey"))
-	if err != nil {
-		return "", err
-	}
-
-	return tokenString, nil
-}
-
-func validateToken(tokenString string) (string, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte("secretKey"), nil
-	})
-	if err != nil {
-		return "", fmt.Errorf("failed to parse token: %w", err)
-	}
-	if !token.Valid {
-		return "", fmt.Errorf("invalid token")
-	}
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return "", fmt.Errorf("invalid claims")
-	}
-	customerXID, ok := claims["userID"].(string)
-	if !ok {
-		return "", fmt.Errorf("invalid userID claim")
-	}
-	exp := claims["exp"].(float64)
-	if time.Now().Unix() > int64(exp) {
-		return "", fmt.Errorf("token has expired")
-	}
-	return customerXID, nil
 }
 
 func HashPassword(password string) (string, error) {
