@@ -32,5 +32,6 @@ type (
 		CreateUser(user generated.User) (string, error)
 		CreateProfileUser(userID string, profile generated.Profile) (string, error)
 		GetUserByUserName(userName string) (*generated.User, error)
+		GetUserByUserID(userName string) (*generated.User, error)
 	}
 )

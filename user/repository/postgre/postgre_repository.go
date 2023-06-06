@@ -41,3 +41,12 @@ func (r *postgreUserRepo) GetUserByUserName(username string) (*generated.User, e
 
 	return &user, nil
 }
+func (r *postgreUserRepo) GetUserByUserID(userID string) (*generated.User, error) {
+	var user generated.User
+	err := r.db.Where(&generated.User{ID: userID}).Find(&user).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
