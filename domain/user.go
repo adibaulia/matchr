@@ -10,8 +10,8 @@ type (
 		Username           string  `json:"username"`
 		Email              string  `json:"email"`
 		Password           string  `json:"password"`
-		UserStatus         *string `json:"user_status"`
-		VerificationStatus *bool   `json:"verification_status"`
+		UserStatus         string  `json:"user_status"`
+		VerificationStatus bool    `json:"verification_status"`
 		Profile            Profile `json:"profile"`
 	}
 

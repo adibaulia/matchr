@@ -17,7 +17,7 @@ func NewUserRepository(db *gorm.DB) domain.UserRepository {
 }
 
 func (r *postgreUserRepo) CreateUser(user generated.User) (string, error) {
-	err := r.db.Create(user).Error
+	err := r.db.Create(&user).Error
 	if err != nil {
 		return "", err
 	}
@@ -26,7 +26,7 @@ func (r *postgreUserRepo) CreateUser(user generated.User) (string, error) {
 func (r *postgreUserRepo) CreateProfileUser(userID string, profile generated.Profile) (string, error) {
 	profile.UserID = userID
 
-	err := r.db.Create(profile).Error
+	err := r.db.Create(&profile).Error
 	if err != nil {
 		return "", err
 	}
