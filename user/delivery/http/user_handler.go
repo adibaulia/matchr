@@ -11,11 +11,11 @@ import (
 
 type (
 	userHandler struct {
-		userUseCase domain.UserUseCase
+		userUseCase domain.UserUsecase
 	}
 )
 
-func NewWalletHandler(r *gin.Engine, us domain.UserUseCase) {
+func NewWalletHandler(r *gin.Engine, us domain.UserUsecase) {
 	handler := &userHandler{us}
 	r.SetTrustedProxies(nil)
 
@@ -24,6 +24,7 @@ func NewWalletHandler(r *gin.Engine, us domain.UserUseCase) {
 	matchr := rg.Group("/matchr")
 	matchr.POST("/register", handler.register)
 	matchr.POST("/login", handler.login)
+	matchr.GET("/find", extractToken, handler.find)
 }
 
 func (h *userHandler) login(c *gin.Context) {
@@ -99,4 +100,23 @@ func (h *userHandler) register(c *gin.Context) {
 	}
 
 	c.JSON(200, nil)
+}
+
+func (h *userHandler) find(c *gin.Context) {
+	userID := c.MustGet("userID").(string)
+	foundUser, err := h.userUseCase.FindPotentialMatchr(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, domain.Response{
+			StatusCode: http.StatusBadRequest,
+			Status:     "error",
+			Message:    err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, domain.Response{
+		StatusCode: 200,
+		Status:     "success",
+		Data:       foundUser,
+	})
 }

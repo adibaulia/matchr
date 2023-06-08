@@ -14,7 +14,7 @@ type UserUsecase struct {
 	repo domain.UserRepository
 }
 
-func NewUserUsecase(repo domain.UserRepository) domain.UserUseCase {
+func NewUserUsecase(repo domain.UserRepository) domain.UserUsecase {
 	return &UserUsecase{repo}
 }
 
@@ -52,6 +52,7 @@ func (u *UserUsecase) RegisterUser(user domain.User) error {
 	return nil
 
 }
+
 func (u *UserUsecase) LoginUser(username, password string) (string, error) {
 	user, err := u.repo.GetUserByUserName(username)
 	if err != nil {
@@ -71,7 +72,37 @@ func (u *UserUsecase) LoginUser(username, password string) (string, error) {
 	}
 
 	return token, nil
+}
 
+func (u *UserUsecase) FindPotentialMatchr(userID string) (*domain.User, error) {
+
+	user, err := u.repo.FindPotentialMatchr(userID)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, fmt.Errorf("not found matching for user %s", userID)
+	}
+
+	profile, err := u.repo.GetProfileByUserID(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.User{
+		ID:                 user.ID,
+		Username:           user.Username,
+		Email:              user.Email,
+		UserStatus:         user.UserStatus,
+		VerificationStatus: user.VerificationStatus,
+		Profile: domain.Profile{
+			Name:            profile.Name,
+			DateOfBirth:     profile.DateOfBirth.Format("02-01-2006"),
+			Gender:          profile.Gender,
+			Bio:             profile.Bio,
+			ProfileImageURL: profile.ProfileImageURL,
+		},
+	}, nil
 }
 
 func HashPassword(password string) (string, error) {

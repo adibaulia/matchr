@@ -23,9 +23,10 @@ type (
 		ProfileImageURL string `json:"profile_image_url"`
 	}
 
-	UserUseCase interface {
+	UserUsecase interface {
 		RegisterUser(user User) error
 		LoginUser(username, password string) (string, error)
+		FindPotentialMatchr(userID string) (*User, error)
 	}
 
 	UserRepository interface {
@@ -33,5 +34,7 @@ type (
 		CreateProfileUser(userID string, profile generated.Profile) (string, error)
 		GetUserByUserName(userName string) (*generated.User, error)
 		GetUserByUserID(userName string) (*generated.User, error)
+		FindPotentialMatchr(userID string) (*generated.User, error)
+		GetProfileByUserID(userID string) (*generated.Profile, error)
 	}
 )
