@@ -54,24 +54,26 @@ func (r *postgreUserRepo) GetUserByUserID(userID string) (*generated.User, error
 	return &user, nil
 }
 
-func (r *postgreUserRepo) FindPotentialMatchr(userID string) (*generated.User, error) {
-	var user generated.User
+func (r *postgreUserRepo) FindPotentialMatchr(userID string) (*domain.UserProfile, error) {
+	var userProfile domain.UserProfile
 	err := r.db.
+		Model(&generated.User{}).
+		Select("users.id, users.username, users.email, users.user_status, users.verification_status, p.name, p.date_of_birth, p.gender, p.bio, p.profile_image_url").
 		Joins("JOIN profiles p ON users.id = p.user_id").
 		Where("users.id NOT IN (?) AND users.id NOT IN (?) AND p.gender NOT IN (?)",
 			r.db.Table("swipes").Select("swiped_id").Where("swiper_id = ?", userID),
 			r.db.Table("swipes").Select("swiper_id").Where("swiped_id = ? AND swipe_direction = false", userID),
 			r.db.Table("profiles").Select("gender").Where("user_id = ?", userID),
 		).
-		Find(&user).Error
+		Scan(&userProfile).Error
 	if err != nil {
 		return nil, err
 	}
-	if user.Username == "" {
+	if userProfile.Username == "" {
 		return nil, nil
 	}
 
-	return &user, nil
+	return &userProfile, nil
 }
 
 func (r *postgreUserRepo) GetProfileByUserID(userID string) (*generated.Profile, error) {

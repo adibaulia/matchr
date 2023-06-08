@@ -84,11 +84,6 @@ func (u *UserUsecase) FindPotentialMatchr(userID string) (*domain.User, error) {
 		return nil, fmt.Errorf("not found matching for user %s", userID)
 	}
 
-	profile, err := u.repo.GetProfileByUserID(user.ID)
-	if err != nil {
-		return nil, err
-	}
-
 	return &domain.User{
 		ID:                 user.ID,
 		Username:           user.Username,
@@ -96,11 +91,11 @@ func (u *UserUsecase) FindPotentialMatchr(userID string) (*domain.User, error) {
 		UserStatus:         user.UserStatus,
 		VerificationStatus: user.VerificationStatus,
 		Profile: domain.Profile{
-			Name:            profile.Name,
-			DateOfBirth:     profile.DateOfBirth.Format("02-01-2006"),
-			Gender:          profile.Gender,
-			Bio:             profile.Bio,
-			ProfileImageURL: profile.ProfileImageURL,
+			Name:            user.Name,
+			DateOfBirth:     user.DateOfBirth.Format("02-01-2006"),
+			Gender:          user.Gender,
+			Bio:             user.Bio,
+			ProfileImageURL: user.ProfileImageURL,
 		},
 	}, nil
 }
